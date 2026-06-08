@@ -118,7 +118,12 @@
         "beads.pathToBd": {
           "type": "string",
           "default": "bees",
-          "description": "Path to the bees CLI executable (bees.exe on Windows). Supports ${env:VAR} placeholders."
+          "description": "Path to the bees CLI executable (bees.exe on Windows). Supports ${env:VAR} placeholders. When a bare name or a mise/asdf shim is given and beads.useMise is enabled, the real binary is resolved via `mise which`."
+        },
+        "beads.useMise": {
+          "type": "boolean",
+          "default": true,
+          "description": "When pathToBd is a bare name or a mise/asdf shim, resolve the real bees binary with `mise which` (run in the project directory, so per-project tool versions apply). Disable to spawn pathToBd as-is."
         },
         "beads.refreshInterval": {
           "type": "number",

@@ -1,6 +1,8 @@
 import * as crypto from "crypto";
+import { execFile } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
+import * as util from "util";
 import * as vscode from "vscode";
 import { Logger } from "../utils/logger";
 import { resolveEnvVariables } from "../utils/resolve-env-variables";
@@ -9,6 +11,7 @@ import { BeadsBeesBackend } from "./BeadsBeesBackend";
 import { BeadsProject } from "./types";
 
 const ACTIVE_PROJECT_KEY = "beads.activeProjectId";
+const execFileAsync = util.promisify(execFile);
 
 type BackendStatusState = "running" | "stopped" | "zombie" | "not_initialized" | "unknown";
 
@@ -362,7 +365,7 @@ export class BeadsProjectManager implements vscode.Disposable {
       await this.context.workspaceState.update(ACTIVE_PROJECT_KEY, project.id);
     }
 
-    const beesPath = this.getBdPath();
+    const beesPath = await this.resolveBeesExecutable(project.rootPath);
 
     this.backend = new BeadsBeesBackend({
       beesPath,
@@ -416,6 +419,67 @@ export class BeadsProjectManager implements vscode.Disposable {
     const config = vscode.workspace.getConfiguration("beads");
     const configuredBdPath = config.get<string>("pathToBd", "bees") ?? "bees";
     return this.resolveBdPath(resolveEnvVariables(configuredBdPath).trim());
+  }
+
+  /**
+   * Resolve the bees executable to spawn for `cwd`.
+   *
+   * Node spawns without a shell, so a bare name or a mise/asdf shim (a script,
+   * not a real .exe) fails on Windows with ENOENT. When the configured path is
+   * a bare name or a mise shim, ask `mise which bees` (run in the project dir,
+   * so per-project tool versions are respected) for the real binary. An
+   * explicit, existing executable path is always honored as-is.
+   */
+  private async resolveBeesExecutable(cwd: string): Promise<string> {
+    const configured = this.getBdPath();
+
+    // An explicit path to a real (non-shim) file wins outright.
+    if (path.isAbsolute(configured) && fs.existsSync(configured) && !this.isMiseShim(configured)) {
+      return configured;
+    }
+
+    const useMise = vscode.workspace.getConfiguration("beads").get<boolean>("useMise", true);
+    if (useMise) {
+      const toolName = this.toolBaseName(configured);
+      const viaMise = await this.resolveViaMise(toolName, cwd);
+      if (viaMise) {
+        this.log.debug(`Resolved '${toolName}' via mise: ${viaMise}`);
+        return viaMise;
+      }
+    }
+
+    return configured;
+  }
+
+  private isMiseShim(candidate: string): boolean {
+    return /[\\/](?:mise|asdf)[\\/]shims[\\/]/i.test(candidate);
+  }
+
+  private toolBaseName(candidate: string): string {
+    const base = path.basename(candidate).replace(/\.(exe|cmd|bat|ps1)$/i, "");
+    return base || "bees";
+  }
+
+  private async resolveViaMise(toolName: string, cwd: string): Promise<string | null> {
+    try {
+      const { stdout } = await execFileAsync("mise", ["which", toolName], {
+        cwd,
+        env: { ...process.env },
+        timeout: 10000,
+      });
+      const resolved = stdout
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .pop();
+      if (resolved && fs.existsSync(resolved)) {
+        return resolved;
+      }
+      this.log.trace(`mise which ${toolName} returned no usable path`);
+    } catch (error) {
+      this.log.trace(`mise which ${toolName} failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    return null;
   }
 
   private isNotInitializedError(error: unknown): boolean {
