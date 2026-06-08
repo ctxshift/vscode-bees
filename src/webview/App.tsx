@@ -107,12 +107,12 @@ export function App(): React.ReactElement {
 
   // Render the appropriate view
   const renderView = () => {
-      if (state.viewType === "beadsPanel" && state.loading && state.beads.length === 0) {
+      if (state.viewType === "beesPanel" && state.loading && state.beads.length === 0) {
         return <Loading />;
       }
 
       switch (state.viewType) {
-      case "beadsDashboard":
+      case "beesDashboard":
         return (
           <DashboardView
             summary={state.summary}
@@ -142,7 +142,7 @@ export function App(): React.ReactElement {
           />
         );
 
-      case "beadsPanel":
+      case "beesPanel":
         return (
           <IssuesView
             beads={state.beads}
@@ -162,7 +162,7 @@ export function App(): React.ReactElement {
           />
         );
 
-      case "beadsDetails": {
+      case "beesDetails": {
         if (!state.selectedBead && !state.loading) {
           return (
             <div className="empty-state compact">

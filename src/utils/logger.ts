@@ -60,7 +60,7 @@ export class Logger {
   async errorNotify(message: string, ...args: unknown[]): Promise<void> {
     this.channel.error(this.format(message), ...args);
     const action = await vscode.window.showErrorMessage(
-      `Beads: ${message}`,
+      `Bees: ${message}`,
       "Show Output"
     );
     if (action === "Show Output") {

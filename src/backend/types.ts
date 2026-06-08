@@ -1,7 +1,7 @@
 /**
- * Beads - TypeScript Data Models
+ * Bees - TypeScript Data Models
  *
- * These types mirror the Beads issue schema as exposed by `bd list --json` and `bd show --json`.
+ * These types mirror the bees issue schema as exposed by `bees list --json` and `bees show --json`.
  * The extension normalizes CLI output into these internal types.
  *
  * Status Mapping (beads canonical statuses):
@@ -217,7 +217,7 @@ export interface BeadSort {
 }
 
 /**
- * Normalizes a status string from Beads CLI to internal BeadStatus
+ * Normalizes a status string from bees CLI to internal BeadStatus
  */
 // Track warned statuses to avoid spam
 const warnedStatuses = new Set<string>();
@@ -255,7 +255,7 @@ export function normalizeStatus(status: string | undefined): BeadStatus | null {
 }
 
 /**
- * Normalizes a priority value from Beads CLI to internal BeadPriority
+ * Normalizes a priority value from bees CLI to internal BeadPriority
  */
 export function normalizePriority(
   priority: number | string | undefined

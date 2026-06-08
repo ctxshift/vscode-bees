@@ -1,5 +1,5 @@
 /**
- * Beads VS Code Extension - Main Entry Point
+ * Bees VS Code Extension - Main Entry Point
  *
  * Simplified to two views:
  * - Issues: List of all beads
@@ -22,7 +22,7 @@ let statusBar: vscode.StatusBarItem;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   // Create the root logger with LogOutputChannel
-  log = createLogger("Beads");
+  log = createLogger("Bees");
 
   // Log activation with version and timestamp for debugging
   const ext = context.extension;
@@ -31,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const timestamp = new Date().toISOString();
   log.info(`Activating v${version}${isDev ? " (dev)" : ""} @ ${timestamp}`);
 
-  const config = vscode.workspace.getConfiguration("beads");
+  const config = vscode.workspace.getConfiguration("bees");
   const configuredProjects = config.get<string[]>("projects", []);
   const workspaceFolders = (vscode.workspace.workspaceFolders ?? []).map((f) => f.uri.fsPath);
   log.debug(`config.pathToBd=${config.get<string>("pathToBd", "bd")}`);
@@ -47,7 +47,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   await projectManager.initialize();
 
   // Initialize context for conditional menu items
-  vscode.commands.executeCommand("setContext", "beads.hasSelectedBead", false);
+  vscode.commands.executeCommand("setContext", "bees.hasSelectedBead", false);
 
   // Create view providers
   dashboardProvider = new DashboardViewProvider(
@@ -70,33 +70,33 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   // Register webview providers
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider("beadsDashboard", dashboardProvider, {
+    vscode.window.registerWebviewViewProvider("beesDashboard", dashboardProvider, {
       webviewOptions: { retainContextWhenHidden: true },
     }),
-    vscode.window.registerWebviewViewProvider("beadsPanel", beadsPanelProvider, {
+    vscode.window.registerWebviewViewProvider("beesPanel", beadsPanelProvider, {
       webviewOptions: { retainContextWhenHidden: true },
     }),
-    vscode.window.registerWebviewViewProvider("beadsDetails", detailsProvider, {
+    vscode.window.registerWebviewViewProvider("beesDetails", detailsProvider, {
       webviewOptions: { retainContextWhenHidden: true },
     })
   );
 
   // Register commands
   context.subscriptions.push(
-    vscode.commands.registerCommand("beads.switchProject", async () => {
+    vscode.commands.registerCommand("bees.switchProject", async () => {
       await projectManager.showProjectPicker();
     }),
 
-    vscode.commands.registerCommand("beads.openBeadsPanel", () => {
-      vscode.commands.executeCommand("beadsPanel.focus");
+    vscode.commands.registerCommand("bees.openBeadsPanel", () => {
+      vscode.commands.executeCommand("beesPanel.focus");
     }),
 
-    vscode.commands.registerCommand("beads.openBeadDetails", async (beadId?: string) => {
+    vscode.commands.registerCommand("bees.openBeadDetails", async (beadId?: string) => {
       if (!beadId) {
         // Prompt for bead ID
         const client = projectManager.getClient();
         if (!client) {
-          vscode.window.showWarningMessage("No active Beads project");
+          vscode.window.showWarningMessage("No active Bees project");
           return;
         }
 
@@ -128,21 +128,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       }
     }),
 
-    vscode.commands.registerCommand("beads.refresh", async () => {
+    vscode.commands.registerCommand("bees.refresh", async () => {
       log.info("Manual refresh triggered");
       await projectManager.refresh();
       dashboardProvider.hardRefresh();
       beadsPanelProvider.hardRefresh();
       detailsProvider.hardRefresh();
       log.info("Refresh complete");
-      vscode.window.setStatusBarMessage("$(check) Beads: Refreshed", 2000);
+      vscode.window.setStatusBarMessage("$(check) Bees: Refreshed", 2000);
     }),
 
-    vscode.commands.registerCommand("beads.startDoltServer", async () => {
+    vscode.commands.registerCommand("bees.startDoltServer", async () => {
       const client = projectManager.getClient();
       const project = projectManager.getActiveProject();
       if (!client || !project) {
-        vscode.window.showWarningMessage("No active Beads project");
+        vscode.window.showWarningMessage("No active Bees project");
         return;
       }
 
@@ -160,11 +160,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       }
     }),
 
-    vscode.commands.registerCommand("beads.stopDoltServer", async () => {
+    vscode.commands.registerCommand("bees.stopDoltServer", async () => {
       const client = projectManager.getClient();
       const project = projectManager.getActiveProject();
       if (!client || !project) {
-        vscode.window.showWarningMessage("No active Beads project");
+        vscode.window.showWarningMessage("No active Bees project");
         return;
       }
 
@@ -182,27 +182,27 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       }
     }),
 
-    vscode.commands.registerCommand("beads.showDoltStatus", async () => {
+    vscode.commands.registerCommand("bees.showDoltStatus", async () => {
       const client = projectManager.getClient();
       const project = projectManager.getActiveProject();
       if (!client || !project) {
-        vscode.window.showWarningMessage("No active Beads project");
+        vscode.window.showWarningMessage("No active Bees project");
         return;
       }
 
       try {
         const output = await client.doltStatus();
         log.info(`Dolt status for ${project.name}:\n${output || "<no output>"}`);
-        vscode.window.showInformationMessage(`Dolt status logged for ${project.name}. Check Output > Beads.`);
+        vscode.window.showInformationMessage(`Dolt status logged for ${project.name}. Check Output > Bees.`);
       } catch (err) {
         await log.errorNotify(`Failed to get Dolt status: ${err instanceof Error ? err.message : String(err)}`);
       }
     }),
 
-    vscode.commands.registerCommand("beads.openDoltLog", async () => {
+    vscode.commands.registerCommand("bees.openDoltLog", async () => {
       const project = projectManager.getActiveProject();
       if (!project) {
-        vscode.window.showWarningMessage("No active Beads project");
+        vscode.window.showWarningMessage("No active Bees project");
         return;
       }
 
@@ -215,7 +215,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       }
     }),
 
-    vscode.commands.registerCommand("beads.copyBeadId", async () => {
+    vscode.commands.registerCommand("bees.copyBeadId", async () => {
       const beadId = detailsProvider.getCurrentBeadId();
       if (beadId) {
         await vscode.env.clipboard.writeText(beadId);
@@ -231,15 +231,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.StatusBarAlignment.Left,
     100
   );
-  statusBar.command = "beads.showStatusMenu";
+  statusBar.command = "bees.showStatusMenu";
   context.subscriptions.push(statusBar);
 
   // Register status menu command
   context.subscriptions.push(
-    vscode.commands.registerCommand("beads.showStatusMenu", async () => {
+    vscode.commands.registerCommand("bees.showStatusMenu", async () => {
       const project = projectManager.getActiveProject();
       if (!project) {
-        vscode.window.showWarningMessage("No active Beads project");
+        vscode.window.showWarningMessage("No active Bees project");
         return;
       }
 
@@ -247,27 +247,27 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       const items: vscode.QuickPickItem[] = [];
 
       items.push(
-        { label: "$(refresh) Refresh", description: "Refresh Beads data" },
+        { label: "$(refresh) Refresh", description: "Refresh Bees data" },
         { label: "$(server-process) Dolt Status", description: "Log Dolt server status" },
         { label: "$(play) Start Dolt", description: "Start the Dolt server for this project" },
         { label: "$(debug-stop) Stop Dolt", description: "Stop the Dolt server for this project" },
-        { label: "$(output) Show Logs", description: "Open Beads output panel" }
+        { label: "$(output) Show Logs", description: "Open Bees output panel" }
       );
 
       const selected = await vscode.window.showQuickPick(items, {
-        title: `Beads: ${project.name} (${status.state})`,
+        title: `Bees: ${project.name} (${status.state})`,
         placeHolder: status.message,
       });
 
       if (selected) {
         if (selected.label.includes("Refresh")) {
-          vscode.commands.executeCommand("beads.refresh");
+          vscode.commands.executeCommand("bees.refresh");
         } else if (selected.label.includes("Dolt Status")) {
-          vscode.commands.executeCommand("beads.showDoltStatus");
+          vscode.commands.executeCommand("bees.showDoltStatus");
         } else if (selected.label.includes("Start Dolt")) {
-          vscode.commands.executeCommand("beads.startDoltServer");
+          vscode.commands.executeCommand("bees.startDoltServer");
         } else if (selected.label.includes("Stop Dolt")) {
-          vscode.commands.executeCommand("beads.stopDoltServer");
+          vscode.commands.executeCommand("bees.stopDoltServer");
         } else if (selected.label.includes("Show Logs")) {
           log.show();
         }
@@ -328,7 +328,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   // Show warning if no projects found
   if (projectManager.getProjects().length === 0) {
     vscode.window.showInformationMessage(
-      "No Beads projects found in the workspace. Initialize a project with `bd init` to get started.",
+      "No Bees projects found in the workspace. Initialize a project with `bees init` to get started.",
       "Learn More"
     ).then((action) => {
       if (action === "Learn More") {
@@ -343,7 +343,7 @@ export function deactivate(): void {
 }
 
 /**
- * Updates the Beads status bar item based on current project state
+ * Updates the Bees status bar item based on current project state
  */
 async function updateStatusBar(): Promise<void> {
   const project = projectManager.getActiveProject();
@@ -357,27 +357,27 @@ async function updateStatusBar(): Promise<void> {
 
   switch (status.state) {
     case "running":
-      statusBar.text = "$(check) Beads";
+      statusBar.text = "$(check) Bees";
       statusBar.backgroundColor = undefined;
-      statusBar.tooltip = `Beads ready for ${project.name}\n${status.message}\nClick for options`;
+      statusBar.tooltip = `Bees ready for ${project.name}\n${status.message}\nClick for options`;
       break;
     case "stopped":
-      statusBar.text = "$(circle-slash) Beads";
+      statusBar.text = "$(circle-slash) Bees";
       statusBar.backgroundColor = new vscode.ThemeColor("statusBarItem.warningBackground");
-      statusBar.tooltip = `Beads unavailable for ${project.name}\n${status.message}\nCheck Output > Beads for details`;
+      statusBar.tooltip = `Bees unavailable for ${project.name}\n${status.message}\nCheck Output > Bees for details`;
       break;
     case "zombie":
-      statusBar.text = "$(warning) Beads";
+      statusBar.text = "$(warning) Bees";
       statusBar.backgroundColor = new vscode.ThemeColor("statusBarItem.errorBackground");
-      statusBar.tooltip = `Beads backend unhealthy for ${project.name}\n${status.message}\nCheck Output > Beads for details`;
+      statusBar.tooltip = `Bees backend unhealthy for ${project.name}\n${status.message}\nCheck Output > Bees for details`;
       break;
     case "not_initialized":
-      statusBar.text = "$(circle-slash) Beads";
+      statusBar.text = "$(circle-slash) Bees";
       statusBar.backgroundColor = new vscode.ThemeColor("statusBarItem.warningBackground");
       statusBar.tooltip = `Project not initialized: ${project.name}\n${status.message}`;
       break;
     default:
-      statusBar.text = "$(question) Beads";
+      statusBar.text = "$(question) Bees";
       statusBar.backgroundColor = undefined;
       statusBar.tooltip = `Unknown state for ${project.name}\n${status.message}`;
   }

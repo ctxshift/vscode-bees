@@ -1,10 +1,13 @@
-# Beads - VS Code Extension
+# Bees - VS Code Extension
 
-<img src="resources/icon.png" alt="Beads icon" width="128" align="right">
+<img src="resources/icon.png" alt="Bees icon" width="128" align="right">
 
-VS Code extension for managing [Beads](https://github.com/steveyegge/beads) issues. Uses `bd` for project discovery and Dolt lifecycle control, and reads issue data directly from Dolt SQL for a faster UI.
+VS Code extension for managing [Bees](https://github.com/ctxshift/bees) issues.
+Bees is a lightweight, single-binary issue tracker backed by local SQLite, with
+issues exported to a git-tracked `issues.jsonl`. The extension drives the `bees`
+CLI directly (no server, no socket), so it works on Linux, macOS, and Windows.
 
-![Beads VS Code Extension](docs/images/beads-vscode-screenshot.png)
+![Bees VS Code Extension](docs/images/beads-vscode-screenshot.png)
 
 ## Features
 
@@ -18,8 +21,6 @@ VS Code extension for managing [Beads](https://github.com/steveyegge/beads) issu
 - Filter-aware: shows "3/5" count when filters hide items
 - Click any card to open details
 
-![Kanban Board View](https://github.com/user-attachments/assets/e1d742bc-186a-448a-83cd-4578a0b984f3)
-
 **Issues Panel**
 
 - Sortable, filterable table with global search
@@ -27,7 +28,7 @@ VS Code extension for managing [Beads](https://github.com/steveyegge/beads) issu
 - Multi-column sorting (shift+click for secondary sort)
 - Persistent column visibility, order, and sort preferences
 - Filter presets: Not Closed, Blocked, Epics
-- Click-to-copy bead IDs
+- Click-to-copy issue IDs
 
 **Details Panel**
 
@@ -36,41 +37,46 @@ VS Code extension for managing [Beads](https://github.com/steveyegge/beads) issu
 - Markdown rendering in description/notes with timezone-aware timestamps
 - Dependency management with grouped relationship types (blocks, related, parent-child)
 
-**Multi-Project & Dolt-Aware UI**
+**Multi-Project**
 
-- Auto-detects `.beads` directories in workspace
+- Auto-detects `.bees` directories in the workspace
 - Project switcher and compact dashboard controls
-- Direct Dolt-backed reads for issues, details, and comments
-- Configurable Dolt change polling for near-real-time updates
-
-## Development
-
-See [docs/development.md](docs/development.md) for build commands, architecture, and beads setup.
+- Reads issues, details, and comments via `bees … --json`
+- Polls the database for near-real-time updates
 
 ## Requirements
 
 - VS Code 1.85.0+
-- Beads CLI (`bd`) in PATH
-- Initialized project (`bd init`)
+- [Bees CLI](https://github.com/ctxshift/bees) (`bees`, or `bees.exe` on Windows) on your `PATH`
+- An initialized project (`bees init`)
+
+If you manage tools with [mise](https://mise.jdx.dev), a bare `bees` (or a mise/asdf
+shim) is resolved to the real binary automatically — see `bees.useMise` below.
 
 ## Installation
 
-Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=planet57.vscode-beads) or [Open VSX](https://open-vsx.org/extension/planet57/vscode-beads), or search "Beads" in VS Code/Cursor/VSCodium Extensions.
+Install the packaged `.vsix`:
+
+```
+code --install-extension vscode-bees-<version>.vsix
+```
+
+or grab it from the [GitHub Releases](https://github.com/ctxshift/vscode-bees/releases).
 
 ## Usage
 
-1. Initialize: `bd init`
-2. Click the Beads icon in the Activity Bar
-3. If needed, use the dashboard controls to inspect/start/stop Dolt for the active project
+1. Initialize: `bees init`
+2. Click the Bees icon in the Activity Bar
+3. Browse, filter, and edit issues across the Dashboard, Issues, and Details views
 
 ### Issues Panel
 
 - Click column headers to sort (shift+click for multi-column)
-- Search by title, description, or bead ID
+- Search by title, description, or issue ID
 - Filter by status, priority, type, assignee, labels
 - Use filter presets or create custom filter combinations
 - Show/hide and reorder columns via ⋮ menu
-- Click row to view details, click bead ID to copy
+- Click a row to view details, click an issue ID to copy
 
 ### Details Panel
 
@@ -82,38 +88,47 @@ Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?it
 
 ## Commands
 
-| Command                   | Description                     |
-| ------------------------- | ------------------------------- |
-| `Beads: Switch Project`   | Select active project           |
-| `Beads: Refresh`          | Refresh all views               |
-| `Beads: Create New Issue` | Create issue via quick input    |
-| `Beads: Start Dolt Server` | Start Dolt for active project  |
-| `Beads: Stop Dolt Server`  | Stop Dolt for active project   |
-| `Beads: Show Dolt Status`  | Log Dolt status for the project |
+| Command                    | Description                |
+| -------------------------- | -------------------------- |
+| `Bees: Switch Project`     | Select active project      |
+| `Bees: Refresh`            | Refresh all views          |
+| `Bees: Open Issues Panel`  | Focus the Issues view      |
+| `Bees: Open Issue Details` | Open the Details view      |
+| `Bees: Copy Issue ID`      | Copy the selected issue ID |
 
 ## Settings
 
-| Setting                 | Default | Description                                         |
-| ----------------------- | ------- | --------------------------------------------------- |
-| `beads.pathToBd`          | `"bd"`  | Path to `bd` CLI                                     |
-| `beads.refreshInterval`   | `3000`  | Dolt change polling interval in ms (0 = disable)     |
-| `beads.renderMarkdown`    | `true`  | Render markdown in text fields                       |
-| `beads.userId`            | `""`    | Your user ID for "Assign to me" (defaults to $USER)  |
-| `beads.tooltipHoverDelay` | `1000` | Delay in ms before showing tooltip on hover (0 = disable) |
+| Setting                  | Default  | Description                                              |
+| ------------------------ | -------- | ------------------------------------------------------- |
+| `bees.pathToBd`          | `"bees"` | Path to the `bees` CLI (`bees.exe` on Windows)          |
+| `bees.useMise`           | `true`   | Resolve a bare name / mise shim via `mise which`        |
+| `bees.refreshInterval`   | `3000`   | Database change polling interval in ms (0 = disable)    |
+| `bees.renderMarkdown`    | `true`   | Render markdown in text fields                          |
+| `bees.userId`            | `""`     | Your user ID for "Assign to me" (defaults to $USER)     |
+| `bees.tooltipHoverDelay` | `1000`   | Delay in ms before showing tooltip on hover (0 = disable) |
 
 ## Troubleshooting
 
-**"No Beads projects found"** - Run `bd init` in project root
+**"No Bees projects found"** — run `bees init` in the project root.
 
-**Dolt not available / issues not loading** - Use the dashboard actions to inspect Dolt status or start the Dolt server for the active project
+**`spawn bees ENOENT`** — the `bees` binary isn't found. Set `bees.pathToBd` to the
+full path to `bees.exe`, or (with mise) keep `bees.useMise` enabled and ensure
+`mise which bees` resolves in the project directory.
 
-**Commands fail** - Check "Beads" output channel, verify `bd` in PATH
+**Commands fail** — check the "Bees" output channel and verify `bees` runs in your terminal.
+
+## Development
+
+```
+mise run setup     # install dependencies
+mise run check     # typecheck + lint + test
+mise run build     # compile extension + webview
+mise run package   # build the .vsix
+```
 
 ## Credits
 
-Built with ❤️ using [Claude Code](https://claude.ai/code)
-
-Icon inspired by <a href="https://www.flaticon.com/free-icons/beads" title="Beads icons">Beads icons created by imaginationlol - Flaticon</a>
+Built with ❤️ using [Claude Code](https://claude.com/claude-code)
 
 Issue type icons from [Font Awesome Free](https://fontawesome.com) ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/))
 

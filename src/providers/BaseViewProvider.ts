@@ -1,5 +1,5 @@
 /**
- * BaseViewProvider - Abstract base class for all Beads webview providers
+ * BaseViewProvider - Abstract base class for all Bees webview providers
  *
  * Provides common functionality for:
  * - Setting up webview content
@@ -88,7 +88,7 @@ export abstract class BaseViewProvider implements vscode.WebviewViewProvider {
     this.postMessage({ type: "setProjects", projects });
 
     // Send settings
-    const config = vscode.workspace.getConfiguration("beads");
+    const config = vscode.workspace.getConfiguration("bees");
     // User ID: prefer setting, fallback to $USER, then "unknown"
     const rawUserId = config.get<string>("userId", "");
     const userId = resolveEnvVariables(rawUserId || "") || process.env.USER || process.env.USERNAME || "unknown";
@@ -139,23 +139,23 @@ export abstract class BaseViewProvider implements vscode.WebviewViewProvider {
       }
 
       case "selectBead":
-        vscode.commands.executeCommand("beads.openBeadDetails", message.beadId);
+        vscode.commands.executeCommand("bees.openBeadDetails", message.beadId);
         break;
 
       case "showDoltStatus":
-        vscode.commands.executeCommand("beads.showDoltStatus");
+        vscode.commands.executeCommand("bees.showDoltStatus");
         break;
 
       case "startDoltServer":
-        vscode.commands.executeCommand("beads.startDoltServer");
+        vscode.commands.executeCommand("bees.startDoltServer");
         break;
 
       case "stopDoltServer":
-        vscode.commands.executeCommand("beads.stopDoltServer");
+        vscode.commands.executeCommand("bees.stopDoltServer");
         break;
 
       case "openDoltLog":
-        vscode.commands.executeCommand("beads.openDoltLog");
+        vscode.commands.executeCommand("bees.openDoltLog");
         break;
 
       case "openProjectFolder": {
@@ -167,12 +167,12 @@ export abstract class BaseViewProvider implements vscode.WebviewViewProvider {
       }
 
       case "openBeadDetails":
-        vscode.commands.executeCommand("beads.openBeadDetails", message.beadId);
+        vscode.commands.executeCommand("bees.openBeadDetails", message.beadId);
         break;
 
       case "viewInGraph":
         // Focus the graph view and highlight the bead
-        vscode.commands.executeCommand("beadsGraph.focus");
+        vscode.commands.executeCommand("beesGraph.focus");
         break;
 
       case "copyBeadId":
@@ -344,7 +344,7 @@ export abstract class BaseViewProvider implements vscode.WebviewViewProvider {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; img-src ${webview.cspSource} https: data:; font-src ${webview.cspSource};">
   <link href="${styleUri}" rel="stylesheet">
-  <title>Beads</title>
+  <title>Bees</title>
 </head>
 <body>
   <div id="root"></div>

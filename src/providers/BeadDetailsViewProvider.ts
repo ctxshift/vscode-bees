@@ -15,7 +15,7 @@ import { WebviewToExtensionMessage, issueToWebviewBead } from "../backend/types"
 import { Logger } from "../utils/logger";
 
 export class BeadDetailsViewProvider extends BaseViewProvider {
-  protected readonly viewType = "beadsDetails";
+  protected readonly viewType = "beesDetails";
   private currentBeadId: string | null = null;
   private currentProjectId: string | null = null;
   private loadSequence = 0; // Tracks request order to prevent stale responses
@@ -36,7 +36,7 @@ export class BeadDetailsViewProvider extends BaseViewProvider {
     this.currentProjectId = this.projectManager.getActiveProject()?.id || null;
 
     // Update context for conditional menu items
-    vscode.commands.executeCommand("setContext", "beads.hasSelectedBead", true);
+    vscode.commands.executeCommand("setContext", "bees.hasSelectedBead", true);
 
     // Auto-expand the details panel
     if (this._view) {
@@ -58,7 +58,7 @@ export class BeadDetailsViewProvider extends BaseViewProvider {
    */
   public clearBead(): void {
     this.currentBeadId = null;
-    vscode.commands.executeCommand("setContext", "beads.hasSelectedBead", false);
+    vscode.commands.executeCommand("setContext", "bees.hasSelectedBead", false);
     this.postMessage({ type: "setBead", bead: null });
     this.setLoading(false);
   }
@@ -228,7 +228,7 @@ export class BeadDetailsViewProvider extends BaseViewProvider {
         break;
 
       case "viewInGraph":
-        vscode.commands.executeCommand("beadsGraph.focus");
+        vscode.commands.executeCommand("beesGraph.focus");
         break;
     }
   }

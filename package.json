@@ -1,11 +1,16 @@
 {
-  "name": "vscode-beads",
-  "displayName": "Beads",
-  "description": "VS Code extension for managing Beads issues",
+  "name": "vscode-bees",
+  "displayName": "Bees",
+  "description": "VS Code extension for managing Bees issues",
   "version": "0.13.0",
-  "publisher": "planet57",
+  "publisher": "ctxshift",
+  "author": "ctxshift",
   "license": "Apache-2.0",
   "icon": "resources/icon.png",
+  "homepage": "https://github.com/ctxshift/vscode-bees",
+  "bugs": {
+    "url": "https://github.com/ctxshift/vscode-bees/issues"
+  },
   "files": [
     "LICENSE",
     "CHANGELOG.md",
@@ -15,7 +20,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/jdillon/vscode-beads"
+    "url": "https://github.com/ctxshift/vscode-bees"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -25,7 +30,7 @@
     "Visualization"
   ],
   "keywords": [
-    "beads",
+    "bees",
     "issues",
     "project management",
     "dashboard"
@@ -38,29 +43,29 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "beads",
-          "title": "Beads",
-          "icon": "resources/beads-icon.svg"
+          "id": "bees",
+          "title": "Bees",
+          "icon": "resources/bees-icon.png"
         }
       ]
     },
     "views": {
-      "beads": [
+      "bees": [
         {
           "type": "webview",
-          "id": "beadsDashboard",
+          "id": "beesDashboard",
           "name": "Dashboard",
           "visibility": "visible"
         },
         {
           "type": "webview",
-          "id": "beadsPanel",
+          "id": "beesPanel",
           "name": "Issues",
           "visibility": "visible"
         },
         {
           "type": "webview",
-          "id": "beadsDetails",
+          "id": "beesDetails",
           "name": "Details",
           "visibility": "visible"
         }
@@ -68,79 +73,79 @@
     },
     "commands": [
       {
-        "command": "beads.switchProject",
-        "title": "Beads: Switch Project",
+        "command": "bees.switchProject",
+        "title": "Bees: Switch Project",
         "icon": "$(folder)"
       },
       {
-        "command": "beads.openBeadsPanel",
-        "title": "Beads: Open Issues Panel",
+        "command": "bees.openBeadsPanel",
+        "title": "Bees: Open Issues Panel",
         "icon": "$(list-unordered)"
       },
       {
-        "command": "beads.openBeadDetails",
-        "title": "Beads: Open Issue Details",
+        "command": "bees.openBeadDetails",
+        "title": "Bees: Open Issue Details",
         "icon": "$(file-text)"
       },
       {
-        "command": "beads.refresh",
-        "title": "Beads: Refresh",
+        "command": "bees.refresh",
+        "title": "Bees: Refresh",
         "icon": "$(refresh)"
       },
       {
-        "command": "beads.copyBeadId",
-        "title": "Beads: Copy Issue ID",
+        "command": "bees.copyBeadId",
+        "title": "Bees: Copy Issue ID",
         "icon": "$(copy)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "beads.refresh",
-          "when": "view == beadsDashboard",
+          "command": "bees.refresh",
+          "when": "view == beesDashboard",
           "group": "navigation@1"
         },
         {
-          "command": "beads.refresh",
-          "when": "view == beadsPanel",
+          "command": "bees.refresh",
+          "when": "view == beesPanel",
           "group": "navigation@1"
         },
         {
-          "command": "beads.copyBeadId",
-          "when": "view == beadsDetails && beads.hasSelectedBead",
+          "command": "bees.copyBeadId",
+          "when": "view == beesDetails && bees.hasSelectedBead",
           "group": "navigation@1"
         }
       ]
     },
     "configuration": {
-      "title": "Beads",
+      "title": "Bees",
       "properties": {
-        "beads.pathToBd": {
+        "bees.pathToBd": {
           "type": "string",
           "default": "bees",
-          "description": "Path to the bees CLI executable (bees.exe on Windows). Supports ${env:VAR} placeholders. When a bare name or a mise/asdf shim is given and beads.useMise is enabled, the real binary is resolved via `mise which`."
+          "description": "Path to the bees CLI executable (bees.exe on Windows). Supports ${env:VAR} placeholders. When a bare name or a mise/asdf shim is given and bees.useMise is enabled, the real binary is resolved via `mise which`."
         },
-        "beads.useMise": {
+        "bees.useMise": {
           "type": "boolean",
           "default": true,
           "description": "When pathToBd is a bare name or a mise/asdf shim, resolve the real bees binary with `mise which` (run in the project directory, so per-project tool versions apply). Disable to spawn pathToBd as-is."
         },
-        "beads.refreshInterval": {
+        "bees.refreshInterval": {
           "type": "number",
           "default": 3000,
           "description": "Polling interval in milliseconds for detecting database changes (0 to disable)"
         },
-        "beads.renderMarkdown": {
+        "bees.renderMarkdown": {
           "type": "boolean",
           "default": true,
           "description": "Render markdown in description, design notes, and other text fields"
         },
-        "beads.userId": {
+        "bees.userId": {
           "type": "string",
           "default": "",
           "description": "Your user ID for 'Assign to me'. Supports ${env:VAR} placeholders (e.g., ${env:USER}). Defaults to $USER if not set."
         },
-        "beads.tooltipHoverDelay": {
+        "bees.tooltipHoverDelay": {
           "type": "number",
           "default": 1000,
           "minimum": 0,
@@ -183,7 +188,6 @@
     "@tanstack/react-table": "^8.21.3",
     "lucide-react": "^0.563.0",
     "marked": "^17.0.1",
-    "mysql2": "^3.20.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

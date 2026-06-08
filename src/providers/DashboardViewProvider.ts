@@ -15,7 +15,7 @@ import { Bead, BeadsSummary, issueToWebviewBead, BeadStatus, BeadPriority } from
 import { Logger } from "../utils/logger";
 
 export class DashboardViewProvider extends BaseViewProvider {
-  protected readonly viewType = "beadsDashboard";
+  protected readonly viewType = "beesDashboard";
   private static readonly MIN_LOADING_MS = 500;
   private loadSequence = 0;
 

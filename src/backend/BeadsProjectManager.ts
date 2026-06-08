@@ -10,7 +10,7 @@ import { BeadsBackend } from "./BeadsBackend";
 import { BeadsBeesBackend } from "./BeadsBeesBackend";
 import { BeadsProject } from "./types";
 
-const ACTIVE_PROJECT_KEY = "beads.activeProjectId";
+const ACTIVE_PROJECT_KEY = "bees.activeProjectId";
 const execFileAsync = util.promisify(execFile);
 
 type BackendStatusState = "running" | "stopped" | "zombie" | "not_initialized" | "unknown";
@@ -168,7 +168,7 @@ export class BeadsProjectManager implements vscode.Disposable {
       if (this.isNotInitializedError(error)) {
         return {
           state: "not_initialized",
-          message: "Beads project is not initialized. Run `bd init` in this project. See Output > Beads for details.",
+          message: "Bees project is not initialized. Run `bees init` in this project. See Output > Bees for details.",
         };
       }
 
@@ -195,7 +195,7 @@ export class BeadsProjectManager implements vscode.Disposable {
 
   async showProjectPicker(): Promise<BeadsProject | undefined> {
     if (this.projects.length === 0) {
-      vscode.window.showWarningMessage("No Beads projects found. Initialize a project with `bd init` first.");
+      vscode.window.showWarningMessage("No Bees projects found. Initialize a project with `bees init` first.");
       return undefined;
     }
 
@@ -206,8 +206,8 @@ export class BeadsProjectManager implements vscode.Disposable {
     }));
 
     const selected = await vscode.window.showQuickPick(items, {
-      placeHolder: "Select a Beads project",
-      title: "Switch Beads Project",
+      placeHolder: "Select a Bees project",
+      title: "Switch Bees Project",
     });
 
     if (!selected) return undefined;
@@ -231,7 +231,7 @@ export class BeadsProjectManager implements vscode.Disposable {
   }
 
   private getConfiguredProjectPaths(): string[] {
-    const config = vscode.workspace.getConfiguration("beads");
+    const config = vscode.workspace.getConfiguration("bees");
     const configured = config.get<string[]>("projects", []);
     return configured.filter((value) => typeof value === "string" && value.trim().length > 0);
   }
@@ -309,7 +309,7 @@ export class BeadsProjectManager implements vscode.Disposable {
 
     const intervalMs = Math.max(
       0,
-      vscode.workspace.getConfiguration("beads").get<number>("refreshInterval", 0)
+      vscode.workspace.getConfiguration("bees").get<number>("refreshInterval", 0)
     );
     if (intervalMs === 0) return;
 
@@ -416,7 +416,7 @@ export class BeadsProjectManager implements vscode.Disposable {
   }
 
   private getBdPath(): string {
-    const config = vscode.workspace.getConfiguration("beads");
+    const config = vscode.workspace.getConfiguration("bees");
     const configuredBdPath = config.get<string>("pathToBd", "bees") ?? "bees";
     return this.resolveBdPath(resolveEnvVariables(configuredBdPath).trim());
   }
@@ -438,7 +438,7 @@ export class BeadsProjectManager implements vscode.Disposable {
       return configured;
     }
 
-    const useMise = vscode.workspace.getConfiguration("beads").get<boolean>("useMise", true);
+    const useMise = vscode.workspace.getConfiguration("bees").get<boolean>("useMise", true);
     if (useMise) {
       const toolName = this.toolBaseName(configured);
       const viaMise = await this.resolveViaMise(toolName, cwd);
