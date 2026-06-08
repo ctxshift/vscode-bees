@@ -1,17 +1,14 @@
 import * as crypto from "crypto";
-import { execFile } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
-import * as util from "util";
 import * as vscode from "vscode";
 import { Logger } from "../utils/logger";
 import { resolveEnvVariables } from "../utils/resolve-env-variables";
 import { BeadsBackend } from "./BeadsBackend";
-import { BeadsDoltBackend } from "./BeadsDoltBackend";
+import { BeadsBeesBackend } from "./BeadsBeesBackend";
 import { BeadsProject } from "./types";
 
 const ACTIVE_PROJECT_KEY = "beads.activeProjectId";
-const execFileAsync = util.promisify(execFile);
 
 type BackendStatusState = "running" | "stopped" | "zombie" | "not_initialized" | "unknown";
 
@@ -262,45 +259,23 @@ export class BeadsProjectManager implements vscode.Disposable {
     rootPath: string,
     explicitBeadsDir?: string
   ): Promise<{ beadsDir: string } | null> {
-    const bdPath = this.getBdPath();
-    const commandLabel = `${bdPath} where`;
+    // bees stores its database under `.bees/` and (on Unix) also exposes a
+    // `.beads` symlink for compatibility. Discovery is a filesystem check —
+    // no CLI invocation — so it works identically on every platform.
+    const candidates = explicitBeadsDir
+      ? [explicitBeadsDir]
+      : [path.join(rootPath, ".bees"), path.join(rootPath, ".beads")];
 
-    try {
-      const env = {
-        ...process.env,
-        ...(explicitBeadsDir ? { BEADS_DIR: explicitBeadsDir } : {}),
-      };
-
-      this.log.debug(
-        `Running discovery probe: ${commandLabel} (cwd=${rootPath}${explicitBeadsDir ? `, BEADS_DIR=${explicitBeadsDir}` : ""})`
-      );
-      const startedAt = Date.now();
-
-      const { stdout } = await execFileAsync(bdPath, ["where"], {
-        cwd: rootPath,
-        env,
-        maxBuffer: 1024 * 1024,
-      });
-      const elapsedMs = Date.now() - startedAt;
-      this.log.debug(`Completed discovery probe: ${commandLabel} (${elapsedMs}ms)`);
-      const trimmedStdout = stdout.trim();
-      if (trimmedStdout) this.log.trace(`discovery stdout: ${trimmedStdout}`);
-
-      const beadsDirLine = stdout
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .find((line) => line.length > 0);
-      if (!beadsDirLine) return null;
-
-      const beadsDir = path.resolve(rootPath, beadsDirLine);
-      return {
-        beadsDir,
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.log.trace(`Discovery probe failed for ${rootPath}: ${message}`);
-      return null;
+    for (const candidate of candidates) {
+      const stats = await this.tryStat(candidate);
+      if (stats && stats.isDirectory()) {
+        this.log.debug(`Discovered bees project at ${candidate}`);
+        return { beadsDir: path.resolve(candidate) };
+      }
     }
+
+    this.log.trace(`No bees project found under ${rootPath}`);
+    return null;
   }
 
   private getProjectDisplayName(rootPath: string, beadsDir: string): string {
@@ -387,14 +362,13 @@ export class BeadsProjectManager implements vscode.Disposable {
       await this.context.workspaceState.update(ACTIVE_PROJECT_KEY, project.id);
     }
 
-    const bdPath = this.getBdPath();
+    const beesPath = this.getBdPath();
 
-    this.backend = new BeadsDoltBackend({
-      bdPath,
+    this.backend = new BeadsBeesBackend({
+      beesPath,
       cwd: project.rootPath,
       beadsDir: project.beadsDir,
       log: this.log,
-      minSupportedVersion: "0.51.0",
     });
 
     project.backendStatus = "unknown";
@@ -422,7 +396,7 @@ export class BeadsProjectManager implements vscode.Disposable {
   }
 
   private resolveBdPath(configuredPath: string): string {
-    const raw = configuredPath || "bd";
+    const raw = configuredPath || "bees";
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
     const resolvedPath = workspaceRoot && !path.isAbsolute(raw) ? path.resolve(workspaceRoot, raw) : raw;
@@ -431,16 +405,16 @@ export class BeadsProjectManager implements vscode.Disposable {
       return resolvedPath;
     }
 
-    if (path.isAbsolute(raw) || raw === "bd") {
+    if (path.isAbsolute(raw) || raw === "bees") {
       return raw;
     }
 
-    return fs.existsSync(raw) ? raw : "bd";
+    return fs.existsSync(raw) ? raw : "bees";
   }
 
   private getBdPath(): string {
     const config = vscode.workspace.getConfiguration("beads");
-    const configuredBdPath = config.get<string>("pathToBd", "bd") ?? "bd";
+    const configuredBdPath = config.get<string>("pathToBd", "bees") ?? "bees";
     return this.resolveBdPath(resolveEnvVariables(configuredBdPath).trim());
   }
 

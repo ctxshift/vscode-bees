@@ -117,13 +117,13 @@
       "properties": {
         "beads.pathToBd": {
           "type": "string",
-          "default": "bd",
-          "description": "Path to the bd CLI executable. Supports ${env:VAR} placeholders."
+          "default": "bees",
+          "description": "Path to the bees CLI executable (bees.exe on Windows). Supports ${env:VAR} placeholders."
         },
         "beads.refreshInterval": {
           "type": "number",
           "default": 3000,
-          "description": "Polling interval in milliseconds for Dolt change detection (0 to disable)"
+          "description": "Polling interval in milliseconds for detecting database changes (0 to disable)"
         },
         "beads.renderMarkdown": {
           "type": "boolean",
