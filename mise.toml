@@ -1,0 +1,48 @@
+# mise tools + tasks for the vscode-bees extension.
+# https://mise.jdx.dev
+#
+#   mise install          # install pinned tools
+#   mise run setup        # install npm deps
+#   mise run check        # typecheck + lint + test
+#   mise run package      # build the .vsix
+
+[tools]
+bun = "1.3"
+node = "22"
+# Pin bees here to test the extension against a real binary in this repo;
+# `mise which bees` (used by beads.useMise) then resolves it. Adjust the
+# backend/version to however you install bees, e.g.:
+# "ubi:ctxshift/bees" = "0.2.0"
+
+[tasks.setup]
+description = "Install dependencies"
+run = "bun install"
+
+[tasks.typecheck]
+description = "Type-check without emitting"
+run = "bun run typecheck"
+
+[tasks.lint]
+description = "Lint sources with eslint"
+run = "bun run lint"
+
+[tasks.test]
+description = "Run the jest test suite"
+run = "bun run test"
+
+[tasks.build]
+description = "Compile the extension + webview bundles"
+run = "bun run compile"
+
+[tasks.watch]
+description = "Recompile on change"
+run = "bun run watch"
+
+[tasks.check]
+description = "typecheck + lint + test"
+depends = ["typecheck", "lint", "test"]
+
+[tasks.package]
+description = "Build the installable .vsix"
+depends = ["build"]
+run = "bun run package"

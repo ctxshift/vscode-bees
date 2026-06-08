@@ -160,9 +160,10 @@
     "watch:extension": "bun run compile:extension -- --watch --sourcemap",
     "watch:webview": "bun run compile:webview -- --watch --sourcemap",
     "lint": "eslint src --ext ts,tsx",
+    "typecheck": "tsc --noEmit",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "vscode:prepublish": "bun run compile",
-    "package": "vsce package"
+    "package": "bunx @vscode/vsce package --no-dependencies"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
