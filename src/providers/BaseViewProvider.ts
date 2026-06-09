@@ -142,22 +142,6 @@ export abstract class BaseViewProvider implements vscode.WebviewViewProvider {
         vscode.commands.executeCommand("bees.openBeadDetails", message.beadId);
         break;
 
-      case "showDoltStatus":
-        vscode.commands.executeCommand("bees.showDoltStatus");
-        break;
-
-      case "startDoltServer":
-        vscode.commands.executeCommand("bees.startDoltServer");
-        break;
-
-      case "stopDoltServer":
-        vscode.commands.executeCommand("bees.stopDoltServer");
-        break;
-
-      case "openDoltLog":
-        vscode.commands.executeCommand("bees.openDoltLog");
-        break;
-
       case "openProjectFolder": {
         const project = this.projectManager.getActiveProject();
         if (project) {

@@ -83,9 +83,6 @@ export interface BeadsBackend {
   probeLive(): Promise<void>;
   info(): Promise<Record<string, unknown>>;
   getChangeToken(): Promise<string | null>;
-  doltStatus(): Promise<string>;
-  startDoltServer(): Promise<string>;
-  stopDoltServer(): Promise<string>;
   list(): Promise<BeadsIssue[]>;
   show(id: string): Promise<BeadsIssue | null>;
   create(args: CreateIssueArgs): Promise<BeadsIssue>;

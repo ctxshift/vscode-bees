@@ -138,83 +138,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       vscode.window.setStatusBarMessage("$(check) Bees: Refreshed", 2000);
     }),
 
-    vscode.commands.registerCommand("bees.startDoltServer", async () => {
-      const client = projectManager.getClient();
-      const project = projectManager.getActiveProject();
-      if (!client || !project) {
-        vscode.window.showWarningMessage("No active Bees project");
-        return;
-      }
-
-      try {
-        const output = await client.startDoltServer();
-        log.info(`Started Dolt server for ${project.name}: ${output || "<no output>"}`);
-        await projectManager.refresh();
-        dashboardProvider.refresh();
-        beadsPanelProvider.refresh();
-        detailsProvider.refresh();
-        await updateStatusBar();
-        vscode.window.showInformationMessage(`Dolt server started for ${project.name}.`);
-      } catch (err) {
-        await log.errorNotify(`Failed to start Dolt server: ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }),
-
-    vscode.commands.registerCommand("bees.stopDoltServer", async () => {
-      const client = projectManager.getClient();
-      const project = projectManager.getActiveProject();
-      if (!client || !project) {
-        vscode.window.showWarningMessage("No active Bees project");
-        return;
-      }
-
-      try {
-        const output = await client.stopDoltServer();
-        log.info(`Stopped Dolt server for ${project.name}: ${output || "<no output>"}`);
-        await projectManager.refresh();
-        dashboardProvider.refresh();
-        beadsPanelProvider.refresh();
-        detailsProvider.refresh();
-        await updateStatusBar();
-        vscode.window.showInformationMessage(`Dolt server stopped for ${project.name}.`);
-      } catch (err) {
-        await log.errorNotify(`Failed to stop Dolt server: ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }),
-
-    vscode.commands.registerCommand("bees.showDoltStatus", async () => {
-      const client = projectManager.getClient();
-      const project = projectManager.getActiveProject();
-      if (!client || !project) {
-        vscode.window.showWarningMessage("No active Bees project");
-        return;
-      }
-
-      try {
-        const output = await client.doltStatus();
-        log.info(`Dolt status for ${project.name}:\n${output || "<no output>"}`);
-        vscode.window.showInformationMessage(`Dolt status logged for ${project.name}. Check Output > Bees.`);
-      } catch (err) {
-        await log.errorNotify(`Failed to get Dolt status: ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }),
-
-    vscode.commands.registerCommand("bees.openDoltLog", async () => {
-      const project = projectManager.getActiveProject();
-      if (!project) {
-        vscode.window.showWarningMessage("No active Bees project");
-        return;
-      }
-
-      const logUri = vscode.Uri.file(vscode.Uri.joinPath(vscode.Uri.file(project.beadsDir), "dolt-server.log").fsPath);
-      try {
-        const doc = await vscode.workspace.openTextDocument(logUri);
-        await vscode.window.showTextDocument(doc, { preview: false });
-      } catch (err) {
-        await log.errorNotify(`Failed to open Dolt log: ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }),
-
     vscode.commands.registerCommand("bees.copyBeadId", async () => {
       const beadId = detailsProvider.getCurrentBeadId();
       if (beadId) {
@@ -248,9 +171,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
       items.push(
         { label: "$(refresh) Refresh", description: "Refresh Bees data" },
-        { label: "$(server-process) Dolt Status", description: "Log Dolt server status" },
-        { label: "$(play) Start Dolt", description: "Start the Dolt server for this project" },
-        { label: "$(debug-stop) Stop Dolt", description: "Stop the Dolt server for this project" },
         { label: "$(output) Show Logs", description: "Open Bees output panel" }
       );
 
@@ -262,12 +182,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       if (selected) {
         if (selected.label.includes("Refresh")) {
           vscode.commands.executeCommand("bees.refresh");
-        } else if (selected.label.includes("Dolt Status")) {
-          vscode.commands.executeCommand("bees.showDoltStatus");
-        } else if (selected.label.includes("Start Dolt")) {
-          vscode.commands.executeCommand("bees.startDoltServer");
-        } else if (selected.label.includes("Stop Dolt")) {
-          vscode.commands.executeCommand("bees.stopDoltServer");
         } else if (selected.label.includes("Show Logs")) {
           log.show();
         }

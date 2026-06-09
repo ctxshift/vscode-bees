@@ -25,12 +25,12 @@ function errMessage(error: unknown): string {
 }
 
 /**
- * Backend that talks to the `bees` CLI (https://github.com/code0100fun/bees).
+ * Backend that talks to the `bees` CLI (https://github.com/ctxshift/bees).
  *
- * Unlike the upstream Dolt backend, bees is a single static binary backed by a
- * local SQLite database. Every operation shells out to `bees <command> --json`
- * via execFile (no shell, no socket, no server), so this backend works
- * identically on Linux, macOS, and Windows (`bees.exe`).
+ * bees is a single static binary backed by a local SQLite database. Every
+ * operation shells out to `bees <command> --json` via execFile (no shell, no
+ * socket, no server), so this backend works identically on Linux, macOS, and
+ * Windows (`bees.exe`).
  */
 export class BeadsBeesBackend implements BeadsBackend {
   private readonly beesPath: string;
@@ -96,20 +96,6 @@ export class BeadsBeesBackend implements BeadsBackend {
     } catch {
       return null;
     }
-  }
-
-  // bees uses an embedded SQLite database; there is no Dolt server to manage.
-  // These remain so the interface (and the existing UI commands) stay intact.
-  async doltStatus(): Promise<string> {
-    return "bees uses an embedded SQLite database; no Dolt server is involved.";
-  }
-
-  async startDoltServer(): Promise<string> {
-    return "bees uses an embedded SQLite database; there is no Dolt server to start.";
-  }
-
-  async stopDoltServer(): Promise<string> {
-    return "bees uses an embedded SQLite database; there is no Dolt server to stop.";
   }
 
   async list(): Promise<BeadsIssue[]> {

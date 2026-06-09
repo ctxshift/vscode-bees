@@ -313,22 +313,22 @@ export class BeadsProjectManager implements vscode.Disposable {
     );
     if (intervalMs === 0) return;
 
-    this.log.debug(`Watching Dolt changes for ${project.name} every ${intervalMs}ms`);
+    this.log.debug(`Watching database changes for ${project.name} every ${intervalMs}ms`);
 
     const poll = async () => {
       if (this.activeProject?.id !== project.id || this.backend !== backend) return;
       try {
-        this.log.trace(`Polling Dolt change token for ${project.name}`);
+        this.log.trace(`Polling database change token for ${project.name}`);
         const token = await backend.getChangeToken();
         if (!token) return;
         if (this.activePollToken === null) {
           this.activePollToken = token;
-          this.log.debug(`Initialized Dolt change token for ${project.name}`);
+          this.log.debug(`Initialized database change token for ${project.name}`);
           return;
         }
         if (token !== this.activePollToken) {
           this.activePollToken = token;
-          this.log.debug(`Detected Dolt change for ${project.name}`);
+          this.log.debug(`Detected database change for ${project.name}`);
           this._onDataChanged.fire();
         }
       } catch (error) {

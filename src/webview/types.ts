@@ -99,10 +99,6 @@ export type WebviewMessage =
   | { type: "refresh" }
   | { type: "selectProject"; projectId: string; projectRootPath?: string }
   | { type: "showProjectMenu"; projectId: string }
-  | { type: "showDoltStatus" }
-  | { type: "startDoltServer" }
-  | { type: "stopDoltServer" }
-  | { type: "openDoltLog" }
   | { type: "openProjectFolder" }
   | { type: "selectBead"; beadId: string }
   | { type: "updateBead"; beadId: string; updates: Partial<Bead> }

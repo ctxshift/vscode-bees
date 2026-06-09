@@ -33,10 +33,6 @@ interface DashboardViewProps {
   activeProject: BeadsProject | null;
   onSelectProject: (project: BeadsProject) => void;
   onSelectBead: (beadId: string) => void;
-  onShowStatus: () => void;
-  onStartDolt: () => void;
-  onStopDolt: () => void;
-  onOpenDoltLog: () => void;
   onOpenProjectFolder: () => void;
   onRetry: () => void;
 }
@@ -50,10 +46,6 @@ export function DashboardView({
   activeProject,
   onSelectProject,
   onSelectBead,
-  onShowStatus,
-  onStartDolt,
-  onStopDolt,
-  onOpenDoltLog,
   onOpenProjectFolder,
   onRetry,
 }: DashboardViewProps): React.ReactElement {
@@ -92,17 +84,8 @@ export function DashboardView({
             <DropdownItem onClick={onRetry}>
               <span className="dashboard-menu-item"><span className="dashboard-menu-item-icon">↻</span><span>Refresh</span></span>
             </DropdownItem>
-            <DropdownItem onClick={onShowStatus}>
-              <span className="dashboard-menu-item"><span className="dashboard-menu-item-icon">i</span><span>Show Dolt Status</span></span>
-            </DropdownItem>
-            <DropdownItem onClick={onStartDolt}>
-              <span className="dashboard-menu-item"><span className="dashboard-menu-item-icon">▶</span><span>Start Dolt</span></span>
-            </DropdownItem>
-            <DropdownItem onClick={onStopDolt}>
-              <span className="dashboard-menu-item"><span className="dashboard-menu-item-icon">■</span><span>Stop Dolt</span></span>
-            </DropdownItem>
-            <DropdownItem onClick={onOpenDoltLog}>
-              <span className="dashboard-menu-item"><span className="dashboard-menu-item-icon">≡</span><span>Open Dolt Log</span></span>
+            <DropdownItem onClick={onOpenProjectFolder}>
+              <span className="dashboard-menu-item"><span className="dashboard-menu-item-icon">⊞</span><span>Open Project Folder</span></span>
             </DropdownItem>
           </Dropdown>
         )}
