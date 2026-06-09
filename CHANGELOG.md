@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-06-09
+
 Forked from [jdillon/vscode-beads](https://github.com/jdillon/vscode-beads) as
 **vscode-bees** ([ctxshift/vscode-bees](https://github.com/ctxshift/vscode-bees)),
 retargeted at the [bees](https://github.com/ctxshift/bees) issue tracker.

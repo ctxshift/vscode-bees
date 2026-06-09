@@ -2,7 +2,7 @@
   "name": "vscode-bees",
   "displayName": "Bees",
   "description": "VS Code extension for managing Bees issues",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "publisher": "ctxshift",
   "author": "ctxshift",
   "license": "Apache-2.0",
