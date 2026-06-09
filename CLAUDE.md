@@ -2,85 +2,86 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+This is **vscode-bees** ([ctxshift/vscode-bees](https://github.com/ctxshift/vscode-bees)),
+a VS Code extension for the [bees](https://github.com/ctxshift/bees) issue tracker.
+It was forked from [jdillon/vscode-beads](https://github.com/jdillon/vscode-beads)
+and retargeted from Beads/Dolt to bees (a single static binary backed by local SQLite).
+
 ## Build Commands
 
+Use mise tasks (they wrap the underlying `bun run` scripts and pin the toolchain):
+
 ```bash
-bun install              # Install dependencies
-bun run compile          # Build extension + webview
-bun run compile:quiet    # Build (quiet output - use this to save context)
-bun run watch            # Watch mode (extension + webview in parallel)
-bun run lint             # ESLint on src/**/*.{ts,tsx}
-bun run test             # Jest tests (experimental VM modules)
-bun run package          # Create VSIX package
+mise run setup      # install dependencies (bun install)
+mise run check      # typecheck + lint + test
+mise run build      # build extension + webview
+mise run watch      # watch mode (extension + webview in parallel)
+mise run package    # create the VSIX
 ```
+
+The underlying scripts (`bun run compile`, `bun run lint`, `bun run typecheck`,
+`bun run test`, `bun run package`) still work directly if you prefer.
 
 ## Development Workflow
 
-**Always branch before making changes.** Never commit directly to main. Create a feature branch before any code changes:
-```bash
-git checkout -b fix/descriptive-name   # or feat/, chore/, etc.
-```
-Exception: If already on a feature branch and told to continue on it (e.g., multiple beads under one PR).
+**Branch before making changes** unless told to push `main` directly. Create a
+feature branch (`fix/`, `feat/`, `chore/`) before code changes when opening a PR.
 
-**Testing workflow with Chrome DevTools MCP**: After building, ask the user to reload code-server and test. Don't automate the reload/test cycle via browser tools - it wastes context.
+**Local testing:**
 
-**code-server for testing**: See `docs/code-server-testing.md` - living document for agent reference. Keep it updated with working config and lessons learned.
+1. Extension Development Host: open the repo in VS Code, run `mise run watch`,
+   press `F5`, then `Ctrl+R` to reload after changes.
+2. Install the VSIX: `mise run package` then
+   `code --install-extension vscode-bees-<version>.vsix` and reload the window.
 
-**Option 1: Extension Development Host (recommended for debugging)**
-
-1. Open this repo in VS Code
-2. Run `bun run watch` in terminal
-3. Press `F5` to launch Extension Development Host
-4. `Cmd+R` (Mac) / `Ctrl+R` (Win/Linux) to reload after changes
-
-**Option 2: Symlink for local testing**
-
-```bash
-# Link extension to VS Code extensions directory
-ln -s "$(pwd)" ~/.vscode/extensions/vscode-beads
-
-# Reload VS Code window: Cmd+Shift+P → "Developer: Reload Window"
-# Unlink when done
-rm ~/.vscode/extensions/vscode-beads
-```
-
-**Option 3: Install VSIX locally**
-
-```bash
-bun run package                              # Creates vscode-beads-0.1.0.vsix
-code --install-extension vscode-beads-0.1.0.vsix
-```
+Point the `bees.pathToBd` setting at your `bees` binary (or leave it as the
+default `bees` and let mise resolve it — see `bees.useMise`).
 
 ## Architecture
 
-VS Code extension for managing [Beads](https://github.com/steveyegge/beads) issues via `bd` CLI.
+VS Code extension for managing [bees](https://github.com/ctxshift/bees) issues
+via the `bees` CLI.
 
 ### Data Flow
 
-1. **BeadsBackend** (`src/backend/BeadsBackend.ts`) - Single source of truth per project. Spawns `bd` CLI commands with `--json` output, parses responses.
-2. **BeadsProjectManager** (`src/backend/BeadsProjectManager.ts`) - Discovers `.beads` directories in workspace, manages active project, daemon lifecycle.
-3. **View Providers** (`src/views/`) - Extend `BaseViewProvider`, register webview views, handle message passing.
-4. **React Webviews** (`src/webview/`) - Single React app with routing by `viewType`. Receives data via `postMessage`, sends actions back to extension.
+1. **BeadsBeesBackend** (`src/backend/BeadsBeesBackend.ts`) — the only backend.
+   Spawns `bees <command> --json` via `execFile` (no shell, no socket, no
+   server), parses responses. Mutations are followed by `show(id)` to return the
+   full issue. Labels go through `bees label add|remove`.
+2. **BeadsProjectManager** (`src/backend/BeadsProjectManager.ts`) — discovers
+   `.bees` (or `.beads`) directories on the filesystem, manages the active
+   project, resolves the `bees` executable (including via `mise which`), and
+   polls `bees.db` mtime for change detection.
+3. **View Providers** (`src/providers/`) — extend `BaseViewProvider`, register
+   webview views, handle message passing.
+4. **React Webviews** (`src/webview/`) — single React app routed by `viewType`.
+   Receives data via `postMessage`, sends actions back to the extension.
 
 ### Key Patterns
 
-- All Beads operations go through CLI (`bd list --json`, `bd show <id> --json`, etc.) - never access `.beads` files directly
-- Status/priority normalization in `src/backend/types.ts` - CLI returns various formats, extension normalizes to internal types
-- Webview↔Extension communication via typed messages (`ExtensionToWebviewMessage`, `WebviewToExtensionMessage`)
-- Single webview bundle at `dist/webview/main.js` serves all 5 views; view type determines which component renders
-- **Prefer components over ad-hoc markup**: Extract reusable UI elements into `src/webview/common/` components (e.g., `StatusBadge`, `FilterChip`) rather than inline spans with class names
-- **No native HTML controls**: Don't use native `<select>`, `<input type="checkbox">`, etc. Use custom components (`Dropdown`, `ColoredSelect`) for consistent VS Code-themed styling
+- All bees operations go through the CLI (`bees list --json`, `bees show <id>
+  --json`, etc.) — never read `.bees` files directly
+- bees is embedded SQLite; there is **no** server/daemon to manage. Do not
+  reintroduce Dolt or socket/daemon concepts
+- Status/priority normalization in `src/backend/types.ts`
+- Webview↔Extension communication via typed messages (`ExtensionMessage`,
+  `WebviewMessage`)
+- A single webview bundle (`dist/webview/main.js`) serves all views; the view
+  type determines which component renders
+- **Prefer components over ad-hoc markup**: extract reusable UI into
+  `src/webview/common/` (e.g. `StatusBadge`, `FilterChip`)
+- **No native HTML controls**: use the custom components (`Dropdown`,
+  `ColoredSelect`) for VS Code-themed styling
+
+> Note: many internal identifiers still use the legacy `Beads`/`bead` names
+> (e.g. `BeadsProjectManager`, `BeadsIssue`, `beadId`, CSS `beads-*`). These are
+> internal only — public settings, command IDs, and copy use `bees`/`Bees`.
 
 ### Build System
 
 - esbuild for both extension (Node/CommonJS) and webview (browser/IIFE)
 - Extension entry: `src/extension.ts` → `dist/extension.js`
 - Webview entry: `src/webview/index.tsx` → `dist/webview/main.js`
-
-## Status/Priority Mapping
-
-CLI status values are normalized: `in-progress`/`active` → `in_progress`, `completed` → `done`, etc.
-Priority is 0-4 where 0 = Critical (P0), 4 = None (P4).
 
 ## CHANGELOG
 
@@ -89,26 +90,30 @@ Maintain `CHANGELOG.md` using [Keep a Changelog](https://keepachangelog.com/) fo
 - Add entries under `## [Unreleased]` as features/fixes are completed
 - Only log notable changes: features, bug fixes, breaking changes
 - Skip minor/internal changes (refactors, typos, CI tweaks)
-- Keep entries terse - one line per change, with bead reference (e.g., `vsbeads-xxx`)
+- Keep entries terse — one line per change
 - Use sections: `### Added`, `### Fixed`, `### Changed`, `### Removed`
 
 At release time, `[Unreleased]` content moves to `## [x.y.z] - date`.
 
 ## Code Conventions
 
-- **kebab-case**: Source code, docs, configs (`my-module.ts`, `api-reference.md`)
-- **UPPERCASE**: Only for standard files (`README.md`, `CHANGELOG.md`, `CLAUDE.md`, `LICENSE`)
+- **kebab-case**: source code, docs, configs (`my-module.ts`, `api-reference.md`)
+- **UPPERCASE**: only for standard files (`README.md`, `CHANGELOG.md`, `CLAUDE.md`, `LICENSE`)
 
 ## Icons
 
-Use [Font Awesome Free](https://fontawesome.com) icons unless there's a good reason not to. Icons are stored as SVG files in `src/webview/icons/` and imported via the `Icon` component or `icons` object. See `src/webview/icons/index.ts` for available icons.
+Use [Font Awesome Free](https://fontawesome.com) icons unless there's a good
+reason not to. Icons live as SVG files in `src/webview/icons/` and are imported
+via the `Icon` component or `icons` object. See `src/webview/icons/index.ts`.
 
 ## Upstream Sync
 
-Periodically check [steveyegge/beads](https://github.com/steveyegge/beads) for changes that affect this extension:
+Two upstreams are relevant:
 
-- **Daemon API**: Check `internal/rpc/protocol.go` and `internal/types/types.go` for new operations, fields, or type changes. Update `BeadsDaemonClient.ts` and `docs/reference/beads-daemon-api.md`.
-- **Bead types**: Check for new `issue_type` values (e.g., `merge-request`, `molecule`). Update `BeadType`, `TYPE_LABELS`, `TYPE_COLORS`, `TYPE_SORT_ORDER` in `src/webview/types.ts` and add icons.
-- **CLI changes**: Check for new commands or flags that should be exposed in the extension.
-
-Reference repo: `~/ws/reference/beads` - refresh with `git fetch && git pull` before investigating.
+- **bees** ([ctxshift/bees](https://github.com/ctxshift/bees)) — the CLI this
+  extension drives. Watch for new commands, flags, `--json` output shape changes,
+  and new `issue_type` values (update `BeadType`, `TYPE_LABELS`, `TYPE_COLORS`,
+  `TYPE_SORT_ORDER` in `src/webview/types.ts` and add icons).
+- **vscode-beads** ([jdillon/vscode-beads](https://github.com/jdillon/vscode-beads))
+  — the fork origin. Cherry-pick UI/UX improvements, but skip anything Dolt- or
+  daemon-related.

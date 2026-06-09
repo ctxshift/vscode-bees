@@ -7,9 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Forked from [jdillon/vscode-beads](https://github.com/jdillon/vscode-beads) as
+**vscode-bees** ([ctxshift/vscode-bees](https://github.com/ctxshift/vscode-bees)),
+retargeted at the [bees](https://github.com/ctxshift/bees) issue tracker.
+
+### Added
+
+- `BeadsBeesBackend`: drives the `bees` CLI directly (`bees … --json` via
+  execFile) — no server, no socket — so the extension works on Linux, macOS,
+  and Windows
+- `bees.useMise` setting: resolve a bare command name or a mise/asdf shim to the
+  real binary via `mise which` (run in the project directory)
+- mise tooling: `mise.toml` with pinned tools and `setup`/`check`/`build`/`package`
+  tasks; CI and Release workflows now run through mise
+
+### Changed
+
+- Rebranded Beads → Bees: publisher/author `ctxshift`, new logo, all settings
+  and command IDs moved from `beads.*` to `bees.*`, user-facing copy updated
+- Project discovery now detects `.bees` (or `.beads`) directories on the
+  filesystem instead of shelling out to `bd where`
+- Change detection polls the `bees.db` mtime instead of a Dolt change token
+- Default `bees.pathToBd` is now `bees`
+
+### Removed
+
+- Dolt backend and all Dolt server controls (Show/Start/Stop/Open Log commands,
+  status-bar entries, dashboard menu items) — bees is backed by embedded SQLite
+- `mysql2` dependency
+
+### Breaking Changes
+
+- Requires the [bees](https://github.com/ctxshift/bees) CLI instead of `bd`
+- Settings renamed `beads.*` → `bees.*`; update your `settings.json`
+
 ### Fixed
 
-- `beads.userId` and `beads.pathToBd` now expand `${env:VAR}` placeholders (#60)
+- `bees.userId` and `bees.pathToBd` now expand `${env:VAR}` placeholders
 
 ## [0.13.0] - 2026-03-20
 
